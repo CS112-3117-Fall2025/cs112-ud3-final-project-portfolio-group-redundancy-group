@@ -1,5 +1,7 @@
 package cs112.ud3;
 
+import java.util.Random;
+
 /**
  * Board class for Minesweeper game.
  * This class manages the game board, including the grid of cells,
@@ -23,8 +25,41 @@ public class Board {
         this.cols = cols;
         this.totalMines = totalMines;
         this.flagsRemaining = totalMines;
-        this.grid = new Object[rows][cols];  // placeholder for Cell objects
+        this.grid = new Object[rows][cols] ;  // placeholder for Cell objects
         // placeholder for mine placement and adjacency setup once Cell is implemented
+        mineRandomizer();
+    }
+
+    private void mineRandomizer(){
+        int placedMines = 0;
+        Random randomNum = new Random();
+        int minesLeft;
+
+        //For-loop fixes NullPointerExceptions by assigning all coordinates in the array a value of 0 (the value that indicates an empty space)
+        for(int x = 0; x < rows; x++){
+            for(int y = 0; y < cols; y++){
+                grid[x][y] = 0;
+            }
+        }
+
+        //has to be a while loop to make sure that the placedMines integer doesn't increase in value even if it 'places' a mine where there already is one. Gives more control to changing the placedMines integer.
+        while(placedMines < totalMines){
+            int randomRow = randomNum.nextInt(rows); //'rows' and 'cols' are the upper bound of the random.nextInt() range that it will generate a random number in
+            int randomColumn = randomNum.nextInt(cols);
+            minesLeft = (totalMines - 1) - placedMines;
+
+            //'!' is included before the .equals to represent a 'does not equal' statement, similar to something like '!='
+            if (!grid[randomRow][randomColumn].equals(1)) { //'1' represents a TRUE value of a bomb. It indicates that that space has a bomb present in that array coordinate and should register as such.
+                grid[randomRow][randomColumn] = 1;
+
+                System.out.println("The coordinate of (" + randomRow + ", " + randomColumn + "), has been selected to place a bomb. Bombs left to place: " + minesLeft);
+                placedMines++;
+            } else if (grid[randomRow][randomColumn].equals(1)){
+                System.out.println("Coordinate (" + randomRow + ", " + randomColumn +") already has bomb, placedMines was not increased.");
+            }
+
+        }
+        System.out.println("All bombs placed.");
     }
 
     /** actions */
