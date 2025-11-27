@@ -6,6 +6,8 @@ public abstract class Cell {
 
     public abstract boolean isMine();
 
+    public abstract boolean revealCell();
+
     public boolean isRevealed() {
         return revealed;
     }
