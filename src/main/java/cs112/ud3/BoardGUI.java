@@ -38,6 +38,11 @@ public class BoardGUI {
                     public boolean isMine() {
                         return false;
                     }
+
+                    @Override
+                    public boolean revealCell() {
+                        return false;
+                    }
                 };
             }
         }
@@ -53,7 +58,7 @@ public class BoardGUI {
                 button.setOnAction(e -> {
                     cell.setRevealed(true);
                     System.out.printf("[%s] Clicked cell (%d, %d)%n", difficulty, row, col);
-                    button.setText(cell.isMine() ? "💣" : " ");
+                    button.setText(cell.revealCell() ? "💣" : " ");
                     button.setDisable(true);
                 });
 
