@@ -17,7 +17,7 @@ public class Board {
     private int cols;
     private int totalMines;
     private int flagsRemaining;
-    private Object[][] grid;       // placeholder for Cell[][] until Cell class is built
+    private Cell[][] cellGrid;       // placeholder for Cell[][] until Cell class is built
 
     /** constructor */
     public Board(int rows, int cols, int totalMines) {
@@ -25,9 +25,9 @@ public class Board {
         this.cols = cols;
         this.totalMines = totalMines;
         this.flagsRemaining = totalMines;
-        this.grid = new Object[rows][cols] ;  // placeholder for Cell objects
-        // placeholder for mine placement and adjacency setup once Cell is implemented
-        mineRandomizer();
+        this.cellGrid = new Cell[rows][cols] ;  // placeholder for Cell objects
+        mineRandomizer(); // placeholder for mine placement and adjacency setup once Cell is implemented
+        updateBombCount(); // placeholder for neighboring mines checker
     }
 
     private void mineRandomizer(){
@@ -35,10 +35,10 @@ public class Board {
         Random randomNum = new Random();
         int minesLeft;
 
-        //For-loop fixes NullPointerExceptions by assigning all coordinates in the array a value of 0 (the value that indicates an empty space)
+        //For-loop fixes NullPointerExceptions by assigning all coordinates in the array to a SafeCell
         for(int x = 0; x < rows; x++){
             for(int y = 0; y < cols; y++){
-                grid[x][y] = 0;
+                cellGrid[x][y] = new SafeCell();
             }
         }
 
@@ -49,17 +49,74 @@ public class Board {
             minesLeft = (totalMines - 1) - placedMines;
 
             //'!' is included before the .equals to represent a 'does not equal' statement, similar to something like '!='
-            if (!grid[randomRow][randomColumn].equals(1)) { //'1' represents a TRUE value of a bomb. It indicates that that space has a bomb present in that array coordinate and should register as such.
-                grid[randomRow][randomColumn] = 1;
+            if (!cellGrid[randomRow][randomColumn].isMine()) { //true represents a TRUE value of a bomb. It indicates that that space has a bomb present in that array coordinate and should register as such.
+                //Gets rid of old SafeCell Object and adds a new MineCell in same spot
+                cellGrid[randomRow][randomColumn] = new MineCell();
 
+                //Remove later, tests function of isMine() and if bomb was placed correctly
                 System.out.println("The coordinate of (" + randomRow + ", " + randomColumn + "), has been selected to place a bomb. Bombs left to place: " + minesLeft);
+                System.out.println("isMine() returns: " + cellGrid[randomRow][randomColumn].isMine());
                 placedMines++;
-            } else if (grid[randomRow][randomColumn].equals(1)){
+            } else if (cellGrid[randomRow][randomColumn].isMine()){
                 System.out.println("Coordinate (" + randomRow + ", " + randomColumn +") already has bomb, placedMines was not increased.");
             }
 
         }
         System.out.println("All bombs placed.");
+    }
+
+    //Runs through cellGrid to assign NeighboringMines value to each safe cell
+    private void updateBombCount() {
+        for(int row = 0; row < rows; row++){
+            for(int col = 0; col < cols; col++){
+                Cell currentCell = cellGrid[row][col];
+
+                //Checks if current cell is not a bomb and continues if so
+                if (!currentCell.isMine()){
+                    int bombCount = 0;
+
+                    //Loop through the 3x3 area around currentCell.
+                    for (int r = row - 1;  r <= row + 1; r++) {
+                        for (int c = col - 1; c <= col + 1; c++) {
+
+                            //Skips the cell itself
+                            if (r == row && c == col){
+                                continue;
+                            }
+
+                            //Skips anything outside the grid
+                            if (r < 0 || r >= rows || c < 0 || c >= cols) {
+                                continue;
+                            }
+
+                            if (cellGrid[r][c].isMine()) {
+                                bombCount++;
+                            }
+                        }
+                    }
+                    //Might be wrong: Casts current cell to make sure it's a SafeCell then sets the NeighboringMines
+                    SafeCell currentSafeCell = (SafeCell) currentCell;
+                    currentSafeCell.setNeighboringMines(bombCount);
+                }
+            }
+        }
+
+        //Mockup Grid
+        for(int row = 0; row < rows; row++){
+            for(int col = 0; col < cols; col++){
+                Cell currentCell = cellGrid[row][col];
+
+                if  (!currentCell.isMine()){
+                    SafeCell currentSafeCell = (SafeCell) currentCell;
+                    System.out.print(" " + currentSafeCell.getNeighboringMines() + " ");
+                } else {
+                    System.out.print(" B ");
+                }
+                if (col == cols - 1) {
+                    System.out.print("\n");
+                }
+            }
+        }
     }
 
     /** actions */
@@ -108,12 +165,12 @@ public class Board {
     /** setters */
     public void setRows(int rows) {
         this.rows = rows;
-        this.grid = new Object[rows][cols];  // placeholder for Cell[][]
+        this.cellGrid = new Cell[rows][cols];  // placeholder for Cell[][]
     }
 
     public void setCols(int cols) {
         this.cols = cols;
-        this.grid = new Object[rows][cols];  // placeholder for Cell[][]
+        this.cellGrid = new Cell[rows][cols];  // placeholder for Cell[][]
     }
 
     public void setTotalMines(int mines) {
@@ -139,7 +196,7 @@ public class Board {
 
     @Override
     public String toString() {
-        int gridSize = (grid != null && grid.length > 0) ? grid.length * grid[0].length : 0;
+        int gridSize = (cellGrid != null && cellGrid.length > 0) ? cellGrid.length * cellGrid[0].length : 0;
         return "Board{rows=" + rows + ", cols=" + cols + ", totalMines=" + totalMines + ", flagsRemaining=" + flagsRemaining + ", gridSize=" + gridSize + "}";
     }
 
