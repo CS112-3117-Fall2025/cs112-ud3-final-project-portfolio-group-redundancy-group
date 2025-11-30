@@ -12,11 +12,11 @@ import java.util.Random;
 
 public class Board {
     // fields
-    private int rows;
-    private int cols;
-    private int totalMines;
+    private final int rows;
+    private final int cols;
+    private final int totalMines;
     private int flagsRemaining;
-    private Cell[][] cellGrid;
+    private final Cell[][] cellGrid;
 
     /** constructor */
     public Board(int rows, int cols, int totalMines) {
@@ -132,8 +132,7 @@ public class Board {
         // mark as revealed
         cell.setRevealed(true);
         // if this is a safe cell with zero neighboring mines, flood-reveal neighbors
-        if (!cell.isMine() && cell instanceof SafeCell) {
-            SafeCell safe = (SafeCell) cell;
+        if (!cell.isMine() && cell instanceof SafeCell safe) {
             if (safe.getNeighboringMines() == 0) {
                 // reveal all neighbors recursively
                 for (int r = row - 1; r <= row + 1; r++) {
@@ -197,29 +196,6 @@ public class Board {
         return cellGrid[row][col];
     }
 
-    /** setters */
-    public void setRows(int rows) {
-        this.rows = rows;
-        this.cellGrid = new Cell[rows][cols];  // placeholder for Cell[][]
-    }
-
-    public void setCols(int cols) {
-        this.cols = cols;
-        this.cellGrid = new Cell[rows][cols];  // placeholder for Cell[][]
-    }
-
-    public void setTotalMines(int mines) {
-        this.totalMines = mines;
-        if (flagsRemaining > mines) {
-            flagsRemaining = mines;
-        }
-        // placeholder for adjusting grid when mine count changes
-    }
-
-    public void setFlagsRemaining(int flags) {
-        this.flagsRemaining = flags;
-    }
-
     public boolean hasRevealedMine() {
         for (int r = 0; r < rows; r++) {
             for (int c = 0; c < cols; c++) {
@@ -247,8 +223,7 @@ public class Board {
     /** overrides */
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof Board)) return false;
-        Board b = (Board) o;
+        if (!(o instanceof Board b)) return false;
         return rows == b.rows && cols == b.cols && totalMines == b.totalMines && flagsRemaining == b.flagsRemaining;
         // placeholder for deep comparison of grid once Cell exists
     }
@@ -260,22 +235,18 @@ public class Board {
     }
 
     /** inner class */
-    public class Position {
-        private int row;   // row index on the board
-        private int col;   // column index on the board
+    public static class Position {
+        private final int row;   // row index on the board
+        private final int col;   // column index on the board
 
         public Position(int row, int col) {
             this.row = row;
             this.col = col;
         }
 
-        public int getRow() { return row; }
-        public int getCol() { return col; }
-
         @Override
         public boolean equals(Object o) {
-            if (!(o instanceof Position)) return false;
-            Position p = (Position) o;
+            if (!(o instanceof Position p)) return false;
             return row == p.row && col == p.col;
         }
 
