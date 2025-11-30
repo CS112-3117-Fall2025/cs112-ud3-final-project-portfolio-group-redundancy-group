@@ -128,11 +128,10 @@ public abstract class Difficulty {
 
     @Override
     public boolean equals(Object o) {
-        if (o == null || !(o instanceof Difficulty)) {
+        if (o == null || !(o instanceof Difficulty otherDifficulty)) {
             return false;
         }
 
-        Difficulty otherDifficulty = (Difficulty) o;
         return this.name.equals(otherDifficulty.name)
                 && this.width == otherDifficulty.width
                 && this.height == otherDifficulty.height
@@ -140,8 +139,7 @@ public abstract class Difficulty {
                 && this.flags == otherDifficulty.flags;
     }
 
-    //ABSTRACT METHODS
-    //This is an abstract method that will act as a template for the future Easy(), Medium(), or Hard() methods in the child classes.
-    public abstract void difficultyChosen(Difficulty difficulty);
-
+    // ABSTRACT METHODS
+    // Each difficulty creates a Board configured for itself
+    public abstract Board createBoard();
 }

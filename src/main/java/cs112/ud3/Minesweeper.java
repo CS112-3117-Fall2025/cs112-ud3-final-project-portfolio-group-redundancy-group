@@ -32,8 +32,6 @@ public class Minesweeper extends Application implements EventHandler<ActionEvent
 
     //SETTING UP VARIABLES
     private Button startButton;
-    private Label startLabel;
-
     public Button easyButton, mediumButton, hardButton;
     public Label difficultyLabel;
 
@@ -41,7 +39,7 @@ public class Minesweeper extends Application implements EventHandler<ActionEvent
     @Override
     public void start(Stage primaryStage) {
         //ASSIGNING VALUES TO THE VARIABLES/MAKING THEM COMPONENTS
-        startLabel = new Label("Welcome to Minesweeper!"); //makes it a label
+        Label startLabel = new Label("Welcome to Minesweeper!"); //makes it a label
         startButton = new Button("Play!"); //makes it a button
         startButton.setOnAction(this); //allows the button to print to the console when clicked
 
@@ -110,11 +108,11 @@ public class Minesweeper extends Application implements EventHandler<ActionEvent
         }
         // If a difficulty is chosen, build the board and show the GUI
         if (d != null) {
-            Board newBoard = new Board(d.getHeight(), d.getWidth(), d.getMineTiles());
-            System.out.println(newBoard);  // optional: verify the board
+            Board newBoard = d.createBoard();
+            System.out.println(newBoard);  //verify the board
 
             Stage stage = (Stage) ((Button) src).getScene().getWindow();
-            new BoardGUI().show(stage, d.getName(), d.getHeight(), d.getWidth());
+            new BoardGUI().show(stage, newBoard, d);
         }
     }
 }

@@ -14,7 +14,7 @@ public class Easy extends Difficulty{
     //No setters or getters because they are inherited.
     //ABSTRACT METHODS IMPLEMENTED
     @Override
-    public void difficultyChosen(Difficulty difficulty) {
-        //placeholder until we can make this change the layout
+    public Board createBoard() {
+        return new Board(getHeight(), getWidth(), getMineTiles());
     }
 }

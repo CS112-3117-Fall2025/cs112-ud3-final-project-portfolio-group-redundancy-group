@@ -8,6 +8,10 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
+import javafx.scene.input.MouseButton;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.util.Duration;
 
 /**
  * BoardGUI
@@ -19,65 +23,156 @@ public class BoardGUI {
     /**
      * Shows a Minesweeper board for a given difficulty and size.
      */
-    public void show(Stage stage, String difficulty, int rows, int cols) {
-        Label title = new Label("Difficulty: " + difficulty);
+    public void show(Stage stage, Board board, Difficulty difficulty) {
+        // UI header label
+        Label title = new Label("Difficulty: " + difficulty.getName());
         title.setFont(new Font("Arial", 24));
+        // total mines and remaining flags
+        Label mineInfo = new Label(
+                "Mines: " + board.getTotalMines() +
+                        "    Flags: " + board.getFlagsRemaining()
+        );
+        mineInfo.setFont(new Font("Arial", 16));
 
+        // Grid container for cell buttons
         GridPane grid = new GridPane();
         grid.setAlignment(Pos.CENTER);
         grid.setHgap(5);
         grid.setVgap(5);
 
-        // --- initialize placeholder cell grid ---
-        Cell[][] cells = new Cell[rows][cols];
-        for (int r = 0; r < rows; r++) {
-            for (int c = 0; c < cols; c++) {
-                // temporary blank cell (not a mine, not flagged)
-                cells[r][c] = new Cell() {
-                    @Override
-                    public boolean isMine() {
-                        return false;
-                    }
+        Button[][] buttons = new Button[board.getRows()][board.getCols()];
 
-                    @Override
-                    public boolean revealCell() {
-                        return false;
-                    }
-                };
-            }
-        }
+        // Build button grid from board data
+        for (int r = 0; r < board.getRows(); r++) {
+            for (int c = 0; c < board.getCols(); c++) {
 
-        // build button grid linked to cells
-        for (int r = 0; r < rows; r++) {
-            for (int c = 0; c < cols; c++) {
-                Cell cell = cells[r][c];
                 Button button = new Button();
                 button.setPrefSize(40, 40);
 
-                int row = r, col = c;
-                button.setOnAction(e -> {
-                    cell.setRevealed(true);
-                    System.out.printf("[%s] Clicked cell (%d, %d)%n", difficulty, row, col);
-                    button.setText(cell.revealCell() ? "💣" : " ");
-                    button.setDisable(true);
-                });
+                int row = r;
+                int col = c;
 
+                buttons[r][c] = button;  // add this line
+
+                button.setOnMouseClicked(e -> {
+                    Cell cell = board.getCell(row, col);
+
+                    // Right-click: toggle flag
+                    if (e.getButton() == MouseButton.SECONDARY) {
+                        if (cell.isRevealed()) return;
+
+                        if (cell.isFlagged()) {
+                            board.unflag(row, col);
+                            button.setText("");
+                        } else {
+                            board.flag(row, col);
+                            button.setText("🚩");
+                        }
+
+                        mineInfo.setText(
+                                "Mines: " + board.getTotalMines() +
+                                        "    Flags: " + board.getFlagsRemaining()
+                        );
+                        return;
+                    }
+                    // Left-click: reveal (ignore if flagged)
+                    if (e.getButton() == MouseButton.PRIMARY) {
+                        if (cell.isFlagged()) return;
+
+                        board.reveal(row, col);
+
+                        //refresh all revealed cells
+                        refreshRevealedCells(board, buttons);
+
+                        // game-over / win checks
+                        // check lose
+                        if (board.hasRevealedMine()) {
+                            // show all bombs as 💣
+                            revealAllMines(board, buttons);
+                            // after a short delay, turn them into 💥 and show "Game Over"
+                            Timeline timeline = new Timeline(
+                                    new KeyFrame(Duration.millis(1000), ev -> explodeMines(board, buttons, mineInfo))
+                            );
+                            timeline.setCycleCount(1);
+                            timeline.play();
+
+                            return;
+                        }
+                        // check win
+                        if (board.allSafeCellsRevealed()) {
+                            mineInfo.setText("You win – all safe cells revealed");
+                            disableAllButtons(buttons);
+                        }
+                    }
+                });
                 grid.add(button, c, r);
             }
         }
 
-        // back button
+        // Return to main menu
         Button back = new Button("Back");
         back.setFont(new Font("Arial", 16));
-        back.setOnAction(e -> {
-            Minesweeper m = new Minesweeper();
-            m.start(stage);
-        });
+        back.setOnAction(e -> new Minesweeper().start(stage));
 
-        VBox layout = new VBox(15, title, grid, back);
+        // Root layout container
+        VBox layout = new VBox(15, title, mineInfo, grid, back);
         layout.setAlignment(Pos.CENTER);
 
-        Scene scene = new Scene(layout, 500, 600);
-        stage.setScene(scene);
+        stage.setScene(new Scene(layout));
+        stage.sizeToScene();
+    }
+    private void refreshRevealedCells (Board board, Button[][]buttons){
+        for (int r = 0; r < board.getRows(); r++) {
+            for (int c = 0; c < board.getCols(); c++) {
+                Cell cell = board.getCell(r, c);
+                Button b = buttons[r][c];
+
+                // Only update newly revealed, non-flagged cells
+                if (cell.isRevealed() && !b.isDisabled() && !cell.isFlagged()) {
+                    if (cell.isMine()) {
+                        b.setText("💣");
+                    } else {
+                        SafeCell safe = (SafeCell) cell;
+                        int count = safe.getNeighboringMines();
+                        b.setText(count == 0 ? "" : String.valueOf(count));
+                    }
+                    b.setDisable(true);
+                }
+            }
+        }
+    }
+    private void revealAllMines(Board board, Button[][] buttons) {
+        for (int r = 0; r < board.getRows(); r++) {
+            for (int c = 0; c < board.getCols(); c++) {
+                Cell cell = board.getCell(r, c);
+                Button b = buttons[r][c];
+
+                if (cell.isMine()) {
+                    b.setText("💣");
+                }
+                b.setDisable(true);
+            }
+        }
+    }
+    private void explodeMines(Board board, Button[][] buttons, Label mineInfo) {
+        for (int r = 0; r < board.getRows(); r++) {
+            for (int c = 0; c < board.getCols(); c++) {
+                Cell cell = board.getCell(r, c);
+                Button b = buttons[r][c];
+
+                if (cell.isMine()) {
+                    b.setText("💥");
+                }
+            }
+        }
+        mineInfo.setText("Game Over – you hit a mine");
+    }
+
+    private void disableAllButtons(Button[][] buttons) {
+        for (int r = 0; r < buttons.length; r++) {
+            for (int c = 0; c < buttons[r].length; c++) {
+                buttons[r][c].setDisable(true);
+            }
+        }
     }
 }

@@ -7,7 +7,6 @@ import java.util.Random;
  * This class manages the game board, including the grid of cells,
  * mine placement, and player actions like revealing and flagging cells.
  *
- * Note: This is a simplified version without the Cell class implemented
  * @author Jeff Peterson
  */
 
@@ -17,7 +16,7 @@ public class Board {
     private int cols;
     private int totalMines;
     private int flagsRemaining;
-    private Cell[][] cellGrid;       // placeholder for Cell[][] until Cell class is built
+    private Cell[][] cellGrid;
 
     /** constructor */
     public Board(int rows, int cols, int totalMines) {
@@ -122,21 +121,50 @@ public class Board {
     /** actions */
     public void reveal(int row, int col) {
         if (!inBounds(row, col)) {
-            // placeholder for throwing InvalidMoveException once defined
             System.out.println("Reveal out of bounds");
             return;
         }
-        // placeholder for reveal logic using Cell once Cell class is built
-    }
-
-    public void flag(int row, int col) {
-        if (!inBounds(row, col)) {
-            System.out.println("Flag out of bounds"); // placeholder for exception later
+        Cell cell = cellGrid[row][col];
+        // already revealed or flagged: do nothing
+        if (cell.isRevealed() || cell.isFlagged()) {
             return;
         }
-        if (flagsRemaining > 0) {
+        // mark as revealed
+        cell.setRevealed(true);
+        // if this is a safe cell with zero neighboring mines, flood-reveal neighbors
+        if (!cell.isMine() && cell instanceof SafeCell) {
+            SafeCell safe = (SafeCell) cell;
+            if (safe.getNeighboringMines() == 0) {
+                // reveal all neighbors recursively
+                for (int r = row - 1; r <= row + 1; r++) {
+                    for (int c = col - 1; c <= col + 1; c++) {
+                        // skip self
+                        if (r == row && c == col) {
+                            continue;
+                        }
+                        if (inBounds(r, c)) {
+                            reveal(r, c);
+                        }
+                    }
+                }
+            }
+        }
+        // if it's a mine, the GUI can check cell.isMine() afterwards and handle "game over"
+    }
+    public void flag(int row, int col) {
+        if (!inBounds(row, col)) {
+            System.out.println("Flag out of bounds");
+            return;
+        }
+        Cell cell = cellGrid[row][col];
+        // don't allow flagging revealed cells
+        if (cell.isRevealed()) {
+            return;
+        }
+        // only flag if not already flagged and there are flags left
+        if (!cell.isFlagged() && flagsRemaining > 0) {
+            cell.setFlagged(true);
             flagsRemaining--;
-            // placeholder for marking a Cell as flagged
         }
     }
 
@@ -145,9 +173,10 @@ public class Board {
             System.out.println("Unflag out of bounds"); // placeholder for exception later
             return;
         }
-        if (flagsRemaining < totalMines) {
+        Cell cell = cellGrid[row][col];
+        if (cell.isFlagged()) {
+            cell.setFlagged(false);
             flagsRemaining++;
-            // placeholder for unmarking a Cell as flagged
         }
     }
 
@@ -161,6 +190,12 @@ public class Board {
     public int getCols() { return cols; }
     public int getTotalMines() { return totalMines; }
     public int getFlagsRemaining() { return flagsRemaining; }
+    public Cell getCell(int row, int col) {
+        if (!inBounds(row, col)) {
+            throw new IllegalArgumentException("Cell out of bounds: (" + row + ", " + col + ")");
+        }
+        return cellGrid[row][col];
+    }
 
     /** setters */
     public void setRows(int rows) {
@@ -183,6 +218,30 @@ public class Board {
 
     public void setFlagsRemaining(int flags) {
         this.flagsRemaining = flags;
+    }
+
+    public boolean hasRevealedMine() {
+        for (int r = 0; r < rows; r++) {
+            for (int c = 0; c < cols; c++) {
+                Cell cell = cellGrid[r][c];
+                if (cell.isMine() && cell.isRevealed()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean allSafeCellsRevealed() {
+        for (int r = 0; r < rows; r++) {
+            for (int c = 0; c < cols; c++) {
+                Cell cell = cellGrid[r][c];
+                if (!cell.isMine() && !cell.isRevealed()) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     /** overrides */
