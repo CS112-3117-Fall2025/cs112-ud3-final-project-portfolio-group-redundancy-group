@@ -3,7 +3,6 @@ package cs112.ud3;
 import cs112.ud3.Cell;
 
 public class SafeCell extends Cell {
-    private final String[] emojiNumbers = {"1","2","3","4","5","6","7","8","9"};
     private int neighborMines;
 
     public SafeCell() {
