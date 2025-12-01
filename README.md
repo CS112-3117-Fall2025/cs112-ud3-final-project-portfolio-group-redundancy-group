@@ -14,8 +14,8 @@ The win and lose conditions are relatively simple. If the user reveals a 'mine' 
 
 ## UML Diagram
 
-<img width="1235" height="697" alt="image" src="https://github.com/user-attachments/assets/2485ced6-fe30-4da7-9ee0-d784966e3545" />
+IMAGE OF UML HERE
 
 ## Wireframe
 
-Place your wireframe image(s) here! Make sure they're updated to be accurate to your final project!
+<img width="1235" height="697" alt="image" src="https://github.com/user-attachments/assets/2485ced6-fe30-4da7-9ee0-d784966e3545" />
