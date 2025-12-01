@@ -14,7 +14,7 @@ The win and lose conditions are relatively simple. If the user reveals a 'mine' 
 
 ## UML Diagram
 
-IMAGE OF UML HERE
+<img width="1238" height="697" alt="image" src="minesweeper_UML.png" />
 
 ## Wireframe
 
