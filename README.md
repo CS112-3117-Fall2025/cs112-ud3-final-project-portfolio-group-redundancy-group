@@ -1,3 +1,4 @@
+
 [![Open in Codespaces](https://classroom.github.com/assets/launch-codespace-2972f46106e565e64193e422d61a12cf1da4916b45550586e14ef0a7c637dd04.svg)](https://classroom.github.com/open-in-codespaces?assignment_repo_id=21833363)
 # Unit Deliverable 3 - Final Project
 
@@ -13,7 +14,7 @@ The win and lose conditions are relatively simple. If the user reveals a 'mine' 
 
 ## UML Diagram
 
-Place your UML diagram image here! Make sure they're updated to be accurate to your final project!
+<img width="1235" height="697" alt="image" src="https://github.com/user-attachments/assets/2485ced6-fe30-4da7-9ee0-d784966e3545" />
 
 ## Wireframe
 
