@@ -9,7 +9,7 @@ The win and lose conditions are relatively simple. If the user reveals a 'mine' 
 
 ## Demo
 
-![Uploading UD3 GIF (2).gif…]()
+![UD3 GIF (2)](https://github.com/user-attachments/assets/b32f40e4-b159-4388-8391-376f6e1ae10d)
 
 ## UML Diagram
 
