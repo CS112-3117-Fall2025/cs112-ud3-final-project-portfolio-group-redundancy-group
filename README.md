@@ -18,4 +18,5 @@ IMAGE OF UML HERE
 
 ## Wireframe
 
-<img width="1235" height="697" alt="image" src="https://github.com/user-attachments/assets/2485ced6-fe30-4da7-9ee0-d784966e3545" />
+<img width="1238" height="697" alt="image" src="https://github.com/user-attachments/assets/e5358f34-f6f4-4d6f-a649-b30fac4de09f" />
+
